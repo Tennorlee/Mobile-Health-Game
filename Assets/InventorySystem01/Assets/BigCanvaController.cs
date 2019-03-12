@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class BigCanvaController : MonoBehaviour {
 
-    public Transform selectedItem;
+    public Transform selectedItem = null;
+    public Transform equipedItem;
+    public Item theItem;
+    public List<Item> quickSlotItems;
 
     // Use this for initialization
     void Start () {
@@ -13,6 +16,6 @@ public class BigCanvaController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+        theItem = selectedItem.GetComponent<Item>();
 	}
 }

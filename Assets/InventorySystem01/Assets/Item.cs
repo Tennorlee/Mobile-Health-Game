@@ -5,25 +5,55 @@ using UnityEngine.EventSystems;
 
 public class Item : MonoBehaviour {
 
-    public string name { get; set; }
-    public Sprite icon { get; set; }
-    public string description { get; set; }
+    // item enabled to eventtrigger
+    public bool itemEnabled = false;
+    // item equiped?
+    public bool isEquiped = false;
+
+    public Item item;
+
+    public string itemName;
+    public Sprite icon;
+    public string description; 
     public enum Type { equip, consumables, throwable};
     public Type type;
 
-    // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    public string stats;
+
+    public double damage;
+    public double criticalChance;
+
+    public double addHealth;
+
+    public void SetItem(Item a)
+    {
+        item = a;
+        itemName = item.itemName;
+        icon = item.icon;
+        description = item.description;
+        type = item.type;
+        stats = item.stats;
+        damage = item.damage;
+        criticalChance = item.criticalChance;
+        addHealth = item.addHealth;
+    }
+
+    public void SetSelect()
+    {
+        BigCanvaController bigCanva = transform.parent.parent.parent.parent.GetComponent<BigCanvaController>();
+        bigCanva.selectedItem = this.transform;
+        bigCanva.theItem = item;
+    }
 
     void OnMouseDown()
     {
-        transform.parent.parent.parent.parent.GetComponent<BigCanvaController>().selectedItem = this.transform;
+        if (itemEnabled)
+        {
+            //get script
+            BigCanvaController bigCanva = transform.parent.parent.parent.parent.GetComponent<BigCanvaController>();
+            bigCanva.selectedItem = this.transform;
+            bigCanva.theItem = item;
+        }
     }
     
 }
