@@ -10,39 +10,60 @@ public class Item : MonoBehaviour {
     // item equiped?
     public bool isEquiped = false;
 
-    public Item item;
-
+    public int itemID;
     public string itemName;
     public Sprite icon;
     public string description; 
+
     public enum Type { equip, consumables, throwable};
+    
     public Type type;
 
-    public string stats;
-
     public double damage;
-    public double criticalChance;
 
-    public double addHealth;
+    public int effectType;
 
+    public double effectNum;
+
+    // only called when it's not null so no need avoid null value.
     public void SetItem(Item a)
     {
-        item = a;
-        itemName = item.itemName;
-        icon = item.icon;
-        description = item.description;
-        type = item.type;
-        stats = item.stats;
-        damage = item.damage;
-        criticalChance = item.criticalChance;
-        addHealth = item.addHealth;
+
+        Debug.Log("Set item called, item a = "+a.itemName+" item attributes:");
+
+        name = a.itemName;
+        itemID = a.itemID;
+        itemName = a.itemName;
+        icon = a.icon;
+        description = a.description;
+        type = a.type;
+        damage = a.damage;
+        effectType = a.effectType;
+        effectNum = a.effectNum;
+        Debug.Log("itemID: "+itemID+"\nItem name: "+itemName+"\nItem description: "+description+"\nItem type: "+type+"\nItem damage: "+damage+"\nItem effectType: "+effectType+"\nItem effectNum: "+effectNum);
+        
+    }
+
+    public void ResetItem(Sprite img){
+        name = "item";
+        itemID = 0 ;
+        itemName = null;
+        icon = img;
+        description = null;
+        // type = ;
+        damage = 0;
+        effectType = 0;
+        effectNum = 0;
+        
     }
 
     public void SetSelect()
     {
+
+        Debug.Log("Item "+itemName+" is set to select!");
         BigCanvaController bigCanva = transform.parent.parent.parent.parent.GetComponent<BigCanvaController>();
         bigCanva.selectedItem = this.transform;
-        bigCanva.theItem = item;
+        
     }
 
     void OnMouseDown()
@@ -52,7 +73,7 @@ public class Item : MonoBehaviour {
             //get script
             BigCanvaController bigCanva = transform.parent.parent.parent.parent.GetComponent<BigCanvaController>();
             bigCanva.selectedItem = this.transform;
-            bigCanva.theItem = item;
+            Debug.Log(itemName+" is pressed");
         }
     }
     

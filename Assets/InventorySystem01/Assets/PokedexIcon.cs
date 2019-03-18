@@ -16,6 +16,12 @@ public class PokedexIcon : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         icon = bigCanva.selectedItem;
-        transform.GetComponent<Image>().sprite = icon.GetComponent<Image>().sprite;
+        if(icon!=null){
+            transform.GetComponent<Image>().sprite = icon.GetComponent<Image>().sprite;
+        }
 	}
+
+    public void setImage(Sprite img){
+        transform.GetComponent<Image>().sprite = img;
+    }
 }

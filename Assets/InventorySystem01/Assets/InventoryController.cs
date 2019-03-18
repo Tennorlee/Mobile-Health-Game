@@ -2,26 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Mono.Data.Sqlite;
+using System.Data;
+using System;
 
 public class InventoryController : MonoBehaviour
 {
     public GameObject SlotPrefab;
     private const int SLOT = 18;
-    public List<Item> acquiredItems = new List<Item>();
+    public static List<Item> acquiredItems = ItemDB.AcquiredItems;
     public List<GameObject> slots = new List<GameObject>();
-    public int[] itemCount = new int[18];
+    public int[] itemCount = ItemDB.itemCount;
+    public Sprite transparentImg;
+
+    // connector
+    private string connectionString;
+    private string sqlQuery;
+    IDbConnection dbConnection;
+    IDbCommand dbCommand;
     
     // Use this for initialization
     void Start()
     {
-        Item basicWeapon = new Item();
-        basicWeapon.itemName = ItemDB.EquipList[0].itemName;
-        basicWeapon.icon = ItemDB.ItemList[ItemDB.EQUIP][0].icon;
-        basicWeapon.description = ItemDB.ItemList[ItemDB.EQUIP][0].description;
-        basicWeapon.type = ItemDB.ItemList[ItemDB.EQUIP][0].type;
-        AddItem(basicWeapon);
 
-        PlaceDummy();
+        Debug.Log("Inventory Controller DB connection startup initialized");
+	    connectionString = "URI=file:" + Application.dataPath + "/InventorySystem01/Assets/InventoryDatabase.db";
+	    Debug.Log("Inventory Controller DB connection startup complete");
 
         for (int i = 0; i < 18; i++)
         {
@@ -32,7 +38,7 @@ public class InventoryController : MonoBehaviour
             newSlot.name = "Slot " + i;
             Transform newItem = newSlot.transform.Find("ItemPrefab");
             Item newItemS = newItem.GetComponent<Item>();
-            Image itemImage = newItem.transform.GetComponent<Image>();
+            Image itemImage = newItemS.transform.GetComponent<Image>();
             newItemS.enabled = !newItemS.enabled;
             newItem.name = "Item " + i;
             newSlot.GetComponent<Slot>().slotID = i;
@@ -40,11 +46,14 @@ public class InventoryController : MonoBehaviour
             {
                 newText += itemCount[i];
             }
+            Debug.Log("Slot "+i);
             newSlot.GetComponentInChildren<Text>().text = newText;
             if (i < acquiredItems.Count)
             {
+                
+                Debug.Log("Setting item: "+acquiredItems[i].itemName);
                 newItemS.itemEnabled = !newItemS.itemEnabled;
-                newItemS.SetItem(acquiredItems[i]);                
+                newItemS.SetItem(acquiredItems[i]);
                 itemImage.sprite = newItemS.icon;
                 newSlot.GetComponent<Slot>().item = acquiredItems[i];
                 if (i == 0)
@@ -54,41 +63,101 @@ public class InventoryController : MonoBehaviour
             }
             slots.Add(newSlot);
         }
+        Debug.Log("IC initialization completed");
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-                
-    }
+    // private void ReadAcquiredItemFromDB(){
+    //     //Debug.Log();
+    //     Debug.Log("IC: Read function called.");
+    //     int i = 0;
+    //     acquiredItems.Clear();
+    //     Debug.Log("IC: Acquired item list cleared");
+    //     using (dbConnection = new SqliteConnection(connectionString)){
+    //         dbConnection.Open();
+    //         Debug.Log("IC: connection opened.");
+    //         dbCommand = dbConnection.CreateCommand();
+    //         sqlQuery = "SELECT * FROM AcquiredItem LIMIT 18";
+    //         dbCommand.CommandText = sqlQuery;
+    //         IDataReader reader = dbCommand.ExecuteReader();
+    //         while (reader.Read()){
+    //             int x = reader.GetInt32(0);
+    //             Debug.Log("IC: ItemID "+x+" loaded.");
+    //             Item item = IDtoITEM(x);
+    //             Debug.Log("IC: Item name: "+item.itemName);
+    //             acquiredItems.Add( item );
+    //             Debug.Log("IC: "+acquiredItems[acquiredItems.Count-1].itemName+" added to the list");
+    //             itemCount[i]=reader.GetInt32(1);
+    //             i++;
+    //         }
+    //         reader.Close();
+    //         reader = null;
+    //         dbCommand.Dispose();
+    //         dbCommand = null;
+    //         dbConnection.Close();
+    //         dbConnection = null;
+    //     }
+    // }
+
+    // /**
+    //     translator
+    // */
+    // private Item IDtoITEM(int id){
+    //     Item item = null;
+
+    //     // get max length
+    //     int MAX = ItemDB.ConsumableList.Count;
+    //     if(MAX<ItemDB.EquipList.Count){
+    //         if(ItemDB.EquipList.Count<ItemDB.ThrowableList.Count){
+    //             MAX = ItemDB.ThrowableList.Count;
+    //         } else {
+    //             MAX = ItemDB.EquipList.Count;
+    //         }
+    //     } else if(MAX<ItemDB.ThrowableList.Count){
+    //         MAX = ItemDB.ThrowableList.Count;
+    //     }
+
+    //     for(int i=0;i<MAX;i++){
+    //         if(i<ItemDB.EquipList.Count && ItemDB.EquipList[i].itemID == id){
+    //             item = ItemDB.EquipList[i];
+    //         }
+    //         if(i<ItemDB.ThrowableList.Count && ItemDB.ThrowableList[i].itemID == id){
+    //             item = ItemDB.ThrowableList[i];
+    //         }
+    //         if(i<ItemDB.ConsumableList.Count && ItemDB.ConsumableList[i].itemID == id){
+    //             item = ItemDB.ConsumableList[i];
+    //         }
+    //     }
+    //     return item;
+
+    // }
     
-    public void AddItem(Item item)
-    {
-        if (acquiredItems.Count <= SLOT)
-        {
-            bool isInList = false;
+    // public void AddItem(Item item)
+    // {
+    //     if (acquiredItems.Count <= SLOT)
+    //     {
+    //         bool isInList = false;
 
-            // check if item is in inventory
-            if (acquiredItems.Count != 0)
-            {
-                for (int i = 0; i < acquiredItems.Count; i++)
-                {
-                    if (acquiredItems[i].itemName == item.itemName)
-                    {
-                        isInList = true;
-                        itemCount[i]++;
-                    }
-                }
-            }
+    //         // check if item is in inventory
+    //         if (acquiredItems.Count != 0)
+    //         {
+    //             for (int i = 0; i < acquiredItems.Count; i++)
+    //             {
+    //                 if (acquiredItems[i].itemName == item.itemName)
+    //                 {
+    //                     isInList = true;
+    //                     itemCount[i]++;
+    //                 }
+    //             }
+    //         }
 
-            // if it's not in the list then add item to the inventory
-            if (!isInList)
-            {
-                acquiredItems.Add(item);
-                itemCount[acquiredItems.Count-1]++;
-            }
-        }
-    }
+    //         // if it's not in the list then add item to the inventory
+    //         if (!isInList)
+    //         {
+    //             acquiredItems.Add(item);
+    //             itemCount[acquiredItems.Count-1]++;
+    //         }
+    //     }
+    // }
 
     private void Sort()
     {
@@ -110,7 +179,7 @@ public class InventoryController : MonoBehaviour
             slot.GetComponentInChildren<Text>().text = newText;
             if (i < acquiredItems.Count)
             {
-                itemS.itemEnabled = !itemS.itemEnabled;
+                itemS.itemEnabled = true;
                 itemS.SetItem(acquiredItems[i]);
                 itemImage.sprite = itemS.icon;
                 slot.GetComponent<Slot>().item = acquiredItems[i];
@@ -118,8 +187,22 @@ public class InventoryController : MonoBehaviour
                 {
                     itemS.SetSelect();
                 }
+            } else {
+                itemS.itemEnabled = false;
+                itemS.SetItem(null);
+                itemImage.sprite = transparentImg;
+                slot.GetComponent<Slot>().item = null;
             }
         }
+    }
+
+    private void SortItemCount(int offset){
+
+        while(offset<SLOT-1){
+            itemCount[offset] = itemCount[offset+1];
+            offset++;
+        }
+
     }
 
     /**
@@ -140,41 +223,26 @@ public class InventoryController : MonoBehaviour
             if (slots[i].transform.Find(itemslot).GetComponent<Item>().itemName == itemName)
             {
                 acquiredItems.Remove(item);
+                if(i!=17){
+                    SortItemCount(i);
+                }
+                Sort();
+                DeleteAcquiredItem(item.itemID);
                 break;
             }
         }
     }
-
-
-
-
-
-
-    public void PlaceDummy()
-    {
-        Item potion = new Item();
-        potion.itemName = ItemDB.ConsumableList[0].itemName;
-        potion.icon = ItemDB.ItemList[ItemDB.CONSUMABLES][0].icon;
-        potion.description = ItemDB.ItemList[ItemDB.CONSUMABLES][0].description;
-        potion.type = ItemDB.ItemList[ItemDB.CONSUMABLES][0].type;
-        AddItem(potion);
-        AddItem(potion);
-
-        Item spear = new Item();
-        spear.itemName = ItemDB.ThrowableList[0].itemName;
-        spear.icon = ItemDB.ItemList[ItemDB.THROW][0].icon;
-        spear.description = ItemDB.ItemList[ItemDB.THROW][0].description;
-        spear.type = ItemDB.ItemList[ItemDB.THROW][0].type;
-        AddItem(spear);
-        AddItem(spear);
-        AddItem(spear);
-        AddItem(spear);
-
-        Item dr = new Item();
-        dr.itemName = ItemDB.EquipList[1].itemName;
-        dr.icon = ItemDB.ItemList[ItemDB.EQUIP][1].icon;
-        dr.description = ItemDB.ItemList[ItemDB.EQUIP][1].description;
-        dr.type = ItemDB.ItemList[ItemDB.EQUIP][1].type;
-        AddItem(dr);
+    
+    public void DeleteAcquiredItem(int id){
+        // abc
+        using (dbConnection = new SqliteConnection(connectionString)){
+            dbConnection.Open(); // Open connection to the db
+            dbCommand = dbConnection.CreateCommand();
+            sqlQuery = " DELETE FROM EquipedItem WHERE ItemID = "+id;
+            dbCommand.CommandText = sqlQuery;
+            dbCommand.ExecuteScalar();
+            dbConnection.Close();
+        }
     }
+
 }

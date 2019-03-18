@@ -4,18 +4,20 @@ using UnityEngine;
 
 public class DeleteButton : MonoBehaviour {
 
-    public BigCanvaController bigCanva;
+    public Transform bigCanva;
+    public BigCanvaController bigCanvaS;
 
     public Transform inventory;
     public InventoryController inventoryS;
 
     public Transform equipButton;
     public EquipButton equipButtonS;
+    private Item selItem;
 
     // Use this for initialization
     void Start()
     {
-        bigCanva = transform.parent.parent.parent.parent.GetComponent<BigCanvaController>();
+        bigCanvaS = bigCanva.GetComponent<BigCanvaController>();
         equipButtonS = equipButton.GetComponent<EquipButton>();
     }
 
@@ -28,7 +30,7 @@ public class DeleteButton : MonoBehaviour {
      */
     private void OnMouseDown()
     {
-        Item selItem = bigCanva.selectedItem.GetComponent<Item>();
+        selItem = bigCanvaS.selectedItem.GetComponent<Item>();
 
         if (selItem.itemName != "The Black Sword")
         {
@@ -36,13 +38,13 @@ public class DeleteButton : MonoBehaviour {
             {
                 equipButtonS.EquipEvent(selItem);
             }
-
             RemoveFromList();
         }
+        bigCanvaS.selectedItem = null;
     }
 
     public void RemoveFromList()
     {
-        inventory.GetComponent<InventoryController>().
+        inventoryS.RemoveItemFromList(selItem);
     }
 }
