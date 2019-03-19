@@ -12,7 +12,7 @@ public class InventoryController : MonoBehaviour
     private const int SLOT = 18;
     public static List<Item> acquiredItems = ItemDB.AcquiredItems;
     public List<GameObject> slots = new List<GameObject>();
-    public int[] itemCount = ItemDB.itemCount;
+    //public int[] ItemDB.itemCount = ItemDB.ItemDB.itemCount;
     public Sprite transparentImg;
 
     // connector
@@ -39,125 +39,37 @@ public class InventoryController : MonoBehaviour
             Transform newItem = newSlot.transform.Find("ItemPrefab");
             Item newItemS = newItem.GetComponent<Item>();
             Image itemImage = newItemS.transform.GetComponent<Image>();
-            newItemS.enabled = !newItemS.enabled;
+            newItemS.enabled = true;
             newItem.name = "Item " + i;
             newSlot.GetComponent<Slot>().slotID = i;
-            if (itemCount[i] > 1)
-            {
-                newText += itemCount[i];
-            }
+            
             Debug.Log("Slot "+i);
-            newSlot.GetComponentInChildren<Text>().text = newText;
             if (i < acquiredItems.Count)
             {
                 
-                Debug.Log("Setting item: "+acquiredItems[i].itemName);
-                newItemS.itemEnabled = !newItemS.itemEnabled;
+                Debug.Log("Setting item: "+acquiredItems[i].itemName);          
+                acquiredItems[i].isEquiped = true;      
                 newItemS.SetItem(acquiredItems[i]);
+                newItemS.itemEnabled = true;
+                if(newItemS.itemEnabled){
+                    Debug.Log(newItemS.itemName +" "+newItemS.itemID+" is set to true, count = "+ItemDB.itemCount[newItemS.itemID]);
+                }
                 itemImage.sprite = newItemS.icon;
                 newSlot.GetComponent<Slot>().item = acquiredItems[i];
+                if (ItemDB.itemCount[newItemS.itemID] > 1)
+                {
+                    newText += ItemDB.itemCount[newItemS.itemID];
+                }
                 if (i == 0)
                 {
                     newItemS.SetSelect();
                 }
             }
+            newSlot.GetComponentInChildren<Text>().text = newText;
             slots.Add(newSlot);
         }
         Debug.Log("IC initialization completed");
     }
-
-    // private void ReadAcquiredItemFromDB(){
-    //     //Debug.Log();
-    //     Debug.Log("IC: Read function called.");
-    //     int i = 0;
-    //     acquiredItems.Clear();
-    //     Debug.Log("IC: Acquired item list cleared");
-    //     using (dbConnection = new SqliteConnection(connectionString)){
-    //         dbConnection.Open();
-    //         Debug.Log("IC: connection opened.");
-    //         dbCommand = dbConnection.CreateCommand();
-    //         sqlQuery = "SELECT * FROM AcquiredItem LIMIT 18";
-    //         dbCommand.CommandText = sqlQuery;
-    //         IDataReader reader = dbCommand.ExecuteReader();
-    //         while (reader.Read()){
-    //             int x = reader.GetInt32(0);
-    //             Debug.Log("IC: ItemID "+x+" loaded.");
-    //             Item item = IDtoITEM(x);
-    //             Debug.Log("IC: Item name: "+item.itemName);
-    //             acquiredItems.Add( item );
-    //             Debug.Log("IC: "+acquiredItems[acquiredItems.Count-1].itemName+" added to the list");
-    //             itemCount[i]=reader.GetInt32(1);
-    //             i++;
-    //         }
-    //         reader.Close();
-    //         reader = null;
-    //         dbCommand.Dispose();
-    //         dbCommand = null;
-    //         dbConnection.Close();
-    //         dbConnection = null;
-    //     }
-    // }
-
-    // /**
-    //     translator
-    // */
-    // private Item IDtoITEM(int id){
-    //     Item item = null;
-
-    //     // get max length
-    //     int MAX = ItemDB.ConsumableList.Count;
-    //     if(MAX<ItemDB.EquipList.Count){
-    //         if(ItemDB.EquipList.Count<ItemDB.ThrowableList.Count){
-    //             MAX = ItemDB.ThrowableList.Count;
-    //         } else {
-    //             MAX = ItemDB.EquipList.Count;
-    //         }
-    //     } else if(MAX<ItemDB.ThrowableList.Count){
-    //         MAX = ItemDB.ThrowableList.Count;
-    //     }
-
-    //     for(int i=0;i<MAX;i++){
-    //         if(i<ItemDB.EquipList.Count && ItemDB.EquipList[i].itemID == id){
-    //             item = ItemDB.EquipList[i];
-    //         }
-    //         if(i<ItemDB.ThrowableList.Count && ItemDB.ThrowableList[i].itemID == id){
-    //             item = ItemDB.ThrowableList[i];
-    //         }
-    //         if(i<ItemDB.ConsumableList.Count && ItemDB.ConsumableList[i].itemID == id){
-    //             item = ItemDB.ConsumableList[i];
-    //         }
-    //     }
-    //     return item;
-
-    // }
-    
-    // public void AddItem(Item item)
-    // {
-    //     if (acquiredItems.Count <= SLOT)
-    //     {
-    //         bool isInList = false;
-
-    //         // check if item is in inventory
-    //         if (acquiredItems.Count != 0)
-    //         {
-    //             for (int i = 0; i < acquiredItems.Count; i++)
-    //             {
-    //                 if (acquiredItems[i].itemName == item.itemName)
-    //                 {
-    //                     isInList = true;
-    //                     itemCount[i]++;
-    //                 }
-    //             }
-    //         }
-
-    //         // if it's not in the list then add item to the inventory
-    //         if (!isInList)
-    //         {
-    //             acquiredItems.Add(item);
-    //             itemCount[acquiredItems.Count-1]++;
-    //         }
-    //     }
-    // }
 
     private void Sort()
     {
@@ -172,9 +84,9 @@ public class InventoryController : MonoBehaviour
             Transform item = slot.transform.Find(itemName);
             Item itemS = item.GetComponent<Item>();
             Image itemImage = item.transform.GetComponent<Image>();
-            if (itemCount[i] > 1)
+            if (ItemDB.itemCount[itemS.itemID] > 1)
             {
-                newText += itemCount[i];
+                newText += ItemDB.itemCount[itemS.itemID];
             }
             slot.GetComponentInChildren<Text>().text = newText;
             if (i < acquiredItems.Count)
@@ -182,16 +94,16 @@ public class InventoryController : MonoBehaviour
                 itemS.itemEnabled = true;
                 itemS.SetItem(acquiredItems[i]);
                 itemImage.sprite = itemS.icon;
-                slot.GetComponent<Slot>().item = acquiredItems[i];
-                if (i == 0)
-                {
-                    itemS.SetSelect();
-                }
+                //slot.GetComponent<Slot>().item = acquiredItems[i];
+                // if (i == 0)
+                // {
+                //     itemS.SetSelect();
+                // }
             } else {
                 itemS.itemEnabled = false;
                 itemS.SetItem(null);
                 itemImage.sprite = transparentImg;
-                slot.GetComponent<Slot>().item = null;
+                //slot.GetComponent<Slot>().item = null;
             }
         }
     }
@@ -199,7 +111,7 @@ public class InventoryController : MonoBehaviour
     private void SortItemCount(int offset){
 
         while(offset<SLOT-1){
-            itemCount[offset] = itemCount[offset+1];
+            ItemDB.itemCount[offset] = ItemDB.itemCount[offset+1];
             offset++;
         }
 
@@ -223,9 +135,7 @@ public class InventoryController : MonoBehaviour
             if (slots[i].transform.Find(itemslot).GetComponent<Item>().itemName == itemName)
             {
                 acquiredItems.Remove(item);
-                if(i!=17){
-                    SortItemCount(i);
-                }
+                ItemDB.itemCount[item.itemID] = 0;
                 Sort();
                 DeleteAcquiredItem(item.itemID);
                 break;

@@ -11,7 +11,6 @@ public class EquipController : MonoBehaviour {
     public Transform QuickSlots;
     public Transform SlotPrefabs;
 
-    private List<Slot> slots = new List<Slot>();
     public static List<Item> QSList = new List<Item>();
     public Transform equipButton;
     public Transform deleteButton;
@@ -21,7 +20,6 @@ public class EquipController : MonoBehaviour {
     public Transform description;
     public Transform stats;
     public Sprite img;
-    public Item emptyItem;
 
     // connector
     private string connectionString;
@@ -39,18 +37,6 @@ public class EquipController : MonoBehaviour {
 
 	    Debug.Log("Equip Controller DB startup complete");
 
-        emptyItem = new Item(){
-            //name = "item",
-            itemID = 0 ,
-            itemName = null,
-            icon = img,
-            description = null,
-            damage = 0,
-            effectType = 0,
-            effectNum = 0,
-            isEquiped = false
-        };
-
         Debug.Log("Instantiating quick slots..");
 
         for(int i = 0; i < 4; i++ ){
@@ -58,10 +44,13 @@ public class EquipController : MonoBehaviour {
             Transform newSlot = Instantiate(SlotPrefabs, QuickSlots);
             newSlot.name = ""+i;
             Item newItem = newSlot.GetComponentInChildren<Item>();
+            Text itemcount = newSlot.GetComponentInChildren<Text>();
             Sprite itemSprite = newItem.transform.GetComponent<Image>().sprite;
             itemSprite = img;
             newItem.name = "Item";
-            slots.Add(newSlot.GetComponent<Slot>());
+            itemcount.text = "";
+            // slots.Add(newSlot.GetComponent<Slot>());
+            newItem.ResetItem(img);
             QSList.Add(newItem);
             
         }
@@ -70,9 +59,10 @@ public class EquipController : MonoBehaviour {
 
         ReadQS_DB();
         ResetWeapon(1);
+        UpdateQS();
 
         if (transform.parent.parent.GetComponent<BigCanvaController>().isUnequiped){
-            equipedItem = emptyItem;
+            equipedItem = ItemDB.emptyItem;
             Debug.Log("EC reads: null, from Bigcanva: null");
         } else{
             equipedItem = transform.parent.parent.GetComponent<BigCanvaController>().equipedItem;
@@ -85,12 +75,33 @@ public class EquipController : MonoBehaviour {
         Debug.Log("EC startup completed.");
     }
 
+
     private void ReadQS_DB(){
         for(int i = 0; i<ItemDB.QuickSlotItems.Count; i++){
+            Debug.Log("qsItem count: "+ItemDB.QuickSlotItems.Count);
             for (int j=0; j<4; j++){
-                if(QSList[j]==emptyItem){
-                    QSList[j]=ItemDB.QuickSlotItems[i];
+                if(QSList[j].itemID == 0 ){
+                    QSList[j].SetItem(ItemDB.QuickSlotItems[i]);
+                    //QSList[j].transform.GetComponent<Image>().sprite = QSList[j].icon;
+                    Debug.Log("QSlist-" +j+ " is set to "+QSList[j].itemName+"\n itemID: "+QSList[j].itemID);
+                    break;
                 }
+            }
+        }
+    }
+
+    private void UpdateQS(){
+        for(int i = 0; i < 4; i++){
+            if(QSList[i].itemID != 0){
+                QSList[i].transform.GetComponent<Image>().sprite = QSList[i].icon;
+                if( ItemDB.itemCount[QSList[i].itemID] > 1 ){
+                    QSList[i].transform.parent.GetComponentInChildren<Text>().text = ""+ItemDB.itemCount[QSList[i].itemID];
+                }
+                
+                Debug.Log(i+ " " +QSList[i].itemName+"'s icon is set");
+            } else {
+                QSList[i].transform.GetComponent<Image>().sprite = img;
+                QSList[i].transform.parent.GetComponentInChildren<Text>().text = "";
             }
         }
     }
@@ -115,6 +126,10 @@ public class EquipController : MonoBehaviour {
                     stat += "Grand Mal\n";
                     break;
 
+                case 3:
+                    stat += "Focal Seizures\n";
+                    break;
+
                 default:
                     break;
 
@@ -130,11 +145,14 @@ public class EquipController : MonoBehaviour {
     public void SetEquip(Transform item){
         Item itemS = item.GetComponent<Item>();
         for(int i = 0; i< 4; i++ ){
-            if(!QSList[i].isEquiped){
-                QSList[i]=itemS;
+            if(QSList[i].itemID==0){
+                QSList[i].SetItem(itemS);
+                Debug.Log("QSList[" + i + "] is set to " + QSList[i].itemName);
                 QSList[i].isEquiped = true;
                 UpdateDB( 2, QSList[i].itemID );
+                UpdateQS();
                 ItemDB.QuickSlotItems.Add(itemS);
+                break;
             }
         }
     }
@@ -142,11 +160,19 @@ public class EquipController : MonoBehaviour {
     public void Unequip(Transform item){
         Item itemS = item.GetComponent<Item>();
         for(int i = 0; i< 4; i++ ){
-            if(QSList[i].itemID == itemS.itemID){
-                ItemDB.QuickSlotItems.Remove(itemS);
+            if(QSList[i].itemID!=0 && QSList[i].itemID == itemS.itemID) {
+                Debug.Log(QSList[i].itemName);
+                for(int j = 0; j<ItemDB.QuickSlotItems.Count;j++){
+                    if(ItemDB.QuickSlotItems[j].itemID == itemS.itemID){
+                        Debug.Log("Quick Slot removed");
+                        ItemDB.QuickSlotItems.RemoveAt(j);
+                    }
+                }
                 itemS.isEquiped = false;
-                QSList[i] = emptyItem;
+                QSList[i].ResetItem(img) ;
                 UpdateDB( 0, itemS.itemID );
+                UpdateQS();
+                break;
             }
         }
     }
@@ -155,7 +181,7 @@ public class EquipController : MonoBehaviour {
     public void ResetWeapon(int i)
     {
         equipedItem = null;
-        ItemDB.EquipedItem = emptyItem;
+        ItemDB.EquipedItem = ItemDB.emptyItem;
         Icon.GetComponent<Image>().sprite = img;
         description.GetComponent<Text>().text = "Equip Something!";
         stats.GetComponent<Text>().text = "";
@@ -165,7 +191,6 @@ public class EquipController : MonoBehaviour {
         }
     }
 
-    /* while ID = 0,  */
     private void UpdateDB(int ID,int itemID){
 
         using ( dbConnection = new SqliteConnection(connectionString)){
@@ -174,14 +199,26 @@ public class EquipController : MonoBehaviour {
 
             dbConnection.Open(); // Open connection to the db
             dbCommand = dbConnection.CreateCommand();
-            if( ID == 0 && itemID == 1){
+            if( ID == 0 && itemID == 1){ //if reset weapon
                 sqlQuery = "UPDATE EquipedItem SET ItemID = 0 WHERE ID = 1";
-            }else if( ID==0 ){
-                sqlQuery = "UPDATE EquipedItem SET ItemID = 0 WHERE ItemID = "+itemID;
-            }else if( ID==1 ){
-                sqlQuery = "UPDATE EquipedItem SET ItemID = "+itemID+" WHERE ID = 1";
+            }else if( ID == 0 ){// if reset item
+                sqlQuery = "UPDATE EquipedItem SET ItemID = 0 WHERE ItemID = " + itemID;
+            }else if( ID == 1 ){// if set weapon
+                sqlQuery = "UPDATE EquipedItem SET ItemID = " + itemID + " WHERE ID = 1";
             }else{
-                sqlQuery = "UPDATE EquipedItem SET ItemID = "+itemID+" WHERE ItemID = NULL AND ItemID > 1 ";
+                int i = 0;
+                sqlQuery = "SELECT ID FROM EquipedItem WHERE ItemID = 0 LIMIT 1";
+                dbCommand.CommandText = sqlQuery;
+                IDataReader reader = dbCommand.ExecuteReader();
+                while (reader.Read()){
+                    i = reader.GetInt32(0);
+                }
+                reader.Close();
+                reader = null;
+                dbCommand.Dispose();
+                dbCommand = dbConnection.CreateCommand();
+                sqlQuery = "UPDATE EquipedItem SET ItemID = "+itemID+" WHERE ID = " + i;
+                // 
             }
             dbCommand.CommandText = sqlQuery;
             dbCommand.ExecuteScalar();

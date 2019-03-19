@@ -18,7 +18,7 @@ public class ItemDB : MonoBehaviour {
     public static List<Item> EquipList = new List<Item>(); // 1
     public static List<Item> ThrowableList = new List<Item>(); // 2
     public static List<Item> AcquiredItems = new List<Item>();
-    public static int[] itemCount = new int[18];
+    public static int[] itemCount = new int[50];
     public Sprite[] sprites;
 
     public static int CONSUMABLES = 0;
@@ -27,10 +27,12 @@ public class ItemDB : MonoBehaviour {
 
     public static Item EquipedItem;
     public static List<Item> QuickSlotItems =new List<Item>();
-    public Transform EC;
-    private EquipController ECs;
+    // public Transform EC;
+    // private EquipController ECs;
     public Transform bigcanva;
     private BigCanvaController bigcanvaS;
+    public static Item emptyItem;
+    public Sprite img;
 
     private string connectionString;
     private string sqlQuery;
@@ -40,10 +42,21 @@ public class ItemDB : MonoBehaviour {
     // Use this for initialization
     void Start () {
 
+        emptyItem = new Item(){
+            itemID = 0 ,
+            itemName = null,
+            icon = img,
+            description = null,
+            damage = 0,
+            effectType = 0,
+            effectNum = 0,
+            isEquiped = false
+        };
+
         ItemList.Add(ConsumableList);
         ItemList.Add(EquipList);
         ItemList.Add(ThrowableList);
-        ECs = EC.GetComponent<EquipController>();
+        // ECs = EC.GetComponent<EquipController>();
         //bigcanva = this.transform;
         bigcanvaS = bigcanva.GetComponent<BigCanvaController>();
 
@@ -215,7 +228,7 @@ public class ItemDB : MonoBehaviour {
                                     QuickSlotItems.Add( IDtoITEM( itemID ));
                                     IDtoITEM(itemID).isEquiped = true;
                                     i++;
-                                    Debug.Log("Item "+i+" "+QuickSlotItems[i-1].itemName+" is read.");
+                                    Debug.Log("Item "+i+" "+QuickSlotItems[i-1].itemName+" is read. quickslot item count:"+QuickSlotItems.Count);
                                 }
                             } else {
                                 EquipedItem = IDtoITEM( reader.GetInt32(1) );
@@ -233,7 +246,7 @@ public class ItemDB : MonoBehaviour {
                         } else {
                             Debug.Log("ID: "+ID+" is NULL.");
                             if (ID == 1){
-                                EquipedItem = ECs.emptyItem;
+                                bigcanvaS.equipedItem = emptyItem;
                                 bigcanvaS.isUnequiped = true;
                             }
                         } 
@@ -253,22 +266,23 @@ public class ItemDB : MonoBehaviour {
         Debug.Log("Reading Acquired Item from Database..");
         int i = 0;
         AcquiredItems.Clear();
-        Debug.Log("IC: Acquired item list cleared");
+        Debug.Log("Acquired item list cleared");
         using (dbConnection = new SqliteConnection(connectionString)){
             dbConnection.Open();
-            Debug.Log("IC: connection opened.");
+            Debug.Log("connection opened.");
             dbCommand = dbConnection.CreateCommand();
             sqlQuery = "SELECT * FROM AcquiredItem LIMIT 18";
             dbCommand.CommandText = sqlQuery;
             IDataReader reader = dbCommand.ExecuteReader();
             while (reader.Read()){
                 int x = reader.GetInt32(0);
-                Debug.Log("IC: ItemID "+x+" loaded.");
+                Debug.Log("ItemID "+x+" loaded.");
                 Item item = IDtoITEM(x);
-                Debug.Log("IC: Item name: "+item.itemName);
+                Debug.Log("Item name: "+item.itemName);
                 AcquiredItems.Add( item );
-                Debug.Log("IC: "+AcquiredItems[AcquiredItems.Count-1].itemName+" added to the list");
-                itemCount[i]=reader.GetInt32(1);
+                Debug.Log(AcquiredItems[AcquiredItems.Count-1].itemName+" added to the list");
+                itemCount[x]=reader.GetInt32(1);
+                Debug.Log("Count at "+x+", "+itemCount[x]);
                 i++;
             }
             reader.Close();

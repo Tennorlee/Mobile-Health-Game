@@ -15,21 +15,14 @@ public class EquipButton : MonoBehaviour {
 	void Start () {
         bigCanvaS = bigCanva.GetComponent<BigCanvaController>();
 	}
-	
-	// Update is called once per frame
-    // Set button text
-	void Update () {
-        if (bigCanvaS.selectedItem!=null){
-		    if (bigCanvaS.selectedItem.GetComponent<Item>().isEquiped)
-            {
-                buttonText.GetComponent<Text>().text = "UNEQUIP";
-            }
-            else
-            {
-                buttonText.GetComponent<Text>().text = "EQUIP";
-            }
-        }
-	}
+
+    public void EQUIP(){
+        buttonText.GetComponent<Text>().text = "EQUIP";
+    }
+
+    public void UNEQUIP(){
+        buttonText.GetComponent<Text>().text = "UNEQUIP";
+    }
 
     /**
      * When Clicked,
@@ -46,34 +39,48 @@ public class EquipButton : MonoBehaviour {
      *      c. item.isEquiped = true
      */
     private void OnMouseDown()
-    {
-        Item selItemS = bigCanvaS.selectedItem.GetComponent<Item>();
-        if (selItemS.isEquiped) // UNEQUIP
-        {
-            EquipEvent(selItemS);
-            bigCanvaS.isUnequiped = true;
-        }
-        else // Equip
-        {
-            selItemS.isEquiped = !selItemS.isEquiped;
-            if (selItemS.type == Item.Type.equip)
+    {//&& bigCanvaS.selectedItem.GetComponent<Item>().itemID!=0
+        if(bigCanvaS.selectedItem!=null){
+            Item selItemS = bigCanvaS.selectedItem.GetComponent<Item>();
+            if (selItemS.isEquiped) // UNEQUIP
             {
-                if(bigCanvaS.equipedItem != null){
-                    bigCanvaS.equipedItem.isEquiped = false; // unequip the previous item.
+                Debug.Log("unequip");
+                EquipEvent(selItemS);
+                if(selItemS.type == Item.Type.equip){
+                    bigCanvaS.isUnequiped = true;
                 }
-                equipController.GetComponent<EquipController>().SetWeapon(bigCanvaS.selectedItem.GetComponent<Item>());
             }
-            else
+            else // Equip
             {
-                if(QSList.Count <= 4){
-                    int j =0;
+                selItemS.isEquiped = true;
+                bigCanvaS.isUnequiped = false;
+                if (selItemS.type == Item.Type.equip)
+                {
+                    if(bigCanvaS.equipedItem.itemID != 0){
+                        bigCanvaS.equipedItem.isEquiped = false; // unequip the previous item.
+                        Debug.Log("item "+bigCanvaS.equipedItem.itemName+" is unequiped.");
+                    }  
+                    Debug.Log("equip weapon "+bigCanvaS.selectedItem.GetComponent<Item>().itemName);
+                    equipController.GetComponent<EquipController>().SetWeapon(bigCanvaS.selectedItem.GetComponent<Item>());
+                }
+                else
+                {
+                    int j = 0;
                     bool isListed =false;
+                    int count = QSList.Count;
+                    Debug.Log(selItemS.itemID);
                     while(j < QSList.Count){
-                        if(QSList[j].itemName == selItemS.itemName){
+                        if(QSList[j].itemID == selItemS.itemID){
                             isListed = true;
+                            Debug.Log("found it.");
+                            break;
                         }
+                        Debug.Log(QSList[j].itemID);
+                        Debug.Log(j);
+                        j++;
                     }
                     if(!isListed){
+                        Debug.Log(selItemS.itemName+" is not listed.");
                         equipController.GetComponent<EquipController>().SetEquip(bigCanvaS.selectedItem);
                     }
                 }
@@ -81,21 +88,24 @@ public class EquipButton : MonoBehaviour {
             bigCanvaS.equipedItem = bigCanvaS.selectedItem.GetComponent<Item>();
             
         }
+        bigCanvaS.isSel = true;
+        
     }
 
     // for global use
     public void EquipEvent(Item selItemS)
     {
-        selItemS.isEquiped = !selItemS.isEquiped;
+        selItemS.isEquiped = false;
         if (selItemS.type == Item.Type.equip)
         {
             equipController.GetComponent<EquipController>().ResetWeapon(0);
-            bigCanvaS.equipedItem = null; // reset equiped item
+            bigCanvaS.setEmpty(); // reset equiped item
+            Debug.Log("Equiped item is set to itemID = "+bigCanvaS.equipedItem.itemID);
         }
         else
         {
             equipController.GetComponent<EquipController>().Unequip(bigCanvaS.selectedItem);
-            bigCanvaS.equipedItem = null;
+            //bigCanvaS.equipedItem = ItemDB.emptyItem;
         }
     }
 }

@@ -199,9 +199,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eab782eabc45814488592cf55f4a0c0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isSel: 0
+  isDel: 0
   selectedItem: {fileID: 0}
   equipedItem: {fileID: 0}
+  prevEquiped: {fileID: 0}
   DC: {fileID: 1377811758}
+  isUnequiped: 0
+  EB: {fileID: 691254462}
+  EBs: {fileID: 0}
 --- !u!114 &2056320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -214,13 +220,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sprites:
-  - {fileID: 21300000, guid: f79251b6c2ced0d45a94e86f04c2b590, type: 3}
+  - {fileID: 21300000, guid: 69d8f5d7c25ac7341bfe7b82d5507182, type: 3}
   - {fileID: 21300000, guid: 3c28389b0e85bde4f9489233c3a78470, type: 3}
-  - {fileID: 21300000, guid: 1d59a39749f618c4b90d34bcd8463882, type: 3}
+  - {fileID: 21300000, guid: 17dc8a43188e7ae4884092b104cec92e, type: 3}
   - {fileID: 21300000, guid: e739687dd54e3f4498ed4ff87bccaa91, type: 3}
   - {fileID: 21300000, guid: e9c10a3d463d3e841b43acd73ad85f1f, type: 3}
-  - {fileID: 21300000, guid: 0ccdc803a55f67142ab3d33d8d18d6ed, type: 3}
-  - {fileID: 21300000, guid: 0ccdc803a55f67142ab3d33d8d18d6ed, type: 3}
+  - {fileID: 21300000, guid: c335bb8a2d58ea645871c7d52555569e, type: 3}
+  - {fileID: 21300000, guid: 059790c789d2a6a46957c4c22b9b3937, type: 3}
   - {fileID: 21300000, guid: e739687dd54e3f4498ed4ff87bccaa91, type: 3}
   - {fileID: 21300000, guid: e739687dd54e3f4498ed4ff87bccaa91, type: 3}
   - {fileID: 21300000, guid: e739687dd54e3f4498ed4ff87bccaa91, type: 3}
@@ -234,8 +240,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: e739687dd54e3f4498ed4ff87bccaa91, type: 3}
   - {fileID: 21300000, guid: e739687dd54e3f4498ed4ff87bccaa91, type: 3}
   - {fileID: 21300000, guid: e739687dd54e3f4498ed4ff87bccaa91, type: 3}
-  EC: {fileID: 820473356}
   bigcanva: {fileID: 2056316}
+  img: {fileID: 21300000, guid: 17d2eeedeb4e56749aa73cd7a318cc25, type: 3}
 --- !u!1 &12685324
 GameObject:
   m_ObjectHideFlags: 0
@@ -397,9 +403,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: 'S
 
-    201
-
-    127'
+    201'
 --- !u!222 &13307400
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1621,7 +1625,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SlotPrefab: {fileID: 1013430876027754, guid: 0194bcc1cdac1314cad62c74a379975d, type: 2}
   slots: []
-  itemCount: 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   transparentImg: {fileID: 21300000, guid: 17d2eeedeb4e56749aa73cd7a318cc25, type: 3}
 --- !u!114 &781599861
 MonoBehaviour:
@@ -1774,7 +1777,6 @@ MonoBehaviour:
   description: {fileID: 1901903909}
   stats: {fileID: 13307398}
   img: {fileID: 21300000, guid: 17d2eeedeb4e56749aa73cd7a318cc25, type: 3}
-  emptyItem: {fileID: 0}
 --- !u!1 &843071227
 GameObject:
   m_ObjectHideFlags: 0
@@ -1842,7 +1844,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Stats: \nDamage: \nCritical Chance: \n"
+  m_Text: "Effective Type: \nDamage: \n"
 --- !u!222 &843071230
 CanvasRenderer:
   m_ObjectHideFlags: 0

@@ -25,6 +25,10 @@ public class Item : MonoBehaviour {
 
     public double effectNum;
 
+    void Update(){
+
+    }
+
     // only called when it's not null so no need avoid null value.
     public void SetItem(Item a)
     {
@@ -45,7 +49,7 @@ public class Item : MonoBehaviour {
     }
 
     public void ResetItem(Sprite img){
-        name = "item";
+        //name = "item";
         itemID = 0 ;
         itemName = null;
         icon = img;
@@ -66,15 +70,17 @@ public class Item : MonoBehaviour {
         
     }
 
+
     void OnMouseDown()
     {
+        Debug.Log(itemName + " is pressed");
         if (itemEnabled)
         {
             //get script
             BigCanvaController bigCanva = transform.parent.parent.parent.parent.GetComponent<BigCanvaController>();
             bigCanva.selectedItem = this.transform;
-            Debug.Log(itemName+" is pressed");
         }
     }
+
     
 }

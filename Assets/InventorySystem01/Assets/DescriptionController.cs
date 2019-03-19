@@ -80,6 +80,11 @@ public class DescriptionController : MonoBehaviour {
                 case 2:
                     stat += "Grand Mal\n";
                     break;
+
+                case 3:
+                    stat += "Focal Seizures\n";
+                    break;
+                    
                 default:
                     break;
             }

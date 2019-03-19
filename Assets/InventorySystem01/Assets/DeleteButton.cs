@@ -30,17 +30,17 @@ public class DeleteButton : MonoBehaviour {
      */
     private void OnMouseDown()
     {
-        selItem = bigCanvaS.selectedItem.GetComponent<Item>();
+        // selItem = bigCanvaS.selectedItem.GetComponent<Item>();
 
-        if (selItem.itemName != "The Black Sword")
-        {
-            if (selItem.isEquiped)
-            {
-                equipButtonS.EquipEvent(selItem);
-            }
-            RemoveFromList();
-        }
-        bigCanvaS.selectedItem = null;
+        // if (selItem.itemID != 1)
+        // {
+        //     if (selItem.isEquiped)
+        //     {
+        //         equipButtonS.EquipEvent(selItem);
+        //     }
+        //     RemoveFromList();
+        // bigCanvaS.selectedItem = null;
+        // }
     }
 
     public void RemoveFromList()
